@@ -1,0 +1,21 @@
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion 27
+    defaultConfig {
+        minSdkVersion 19
+        targetSdkVersion 27
+    }
+}
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'org.slf4j:slf4j-api:1.7.25'
+    implementation 'org.slf4j:slf4j-android:1.7.25'
+    implementation 'commons-lang:commons-lang:2.6'
+    implementation 'net.sourceforge.htmlcleaner:htmlcleaner:2.19'
+    implementation 'com.google.guava:guava:23.0'
+
+}
+
+sourceCompatibility = "1.8"
+targetCompatibility = "1.8"
