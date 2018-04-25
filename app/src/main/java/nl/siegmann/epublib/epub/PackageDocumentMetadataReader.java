@@ -11,6 +11,7 @@ import nl.siegmann.epublib.domain.Author;
 import nl.siegmann.epublib.domain.Date;
 import nl.siegmann.epublib.domain.Identifier;
 import nl.siegmann.epublib.domain.Metadata;
+import nl.siegmann.epublib.domain.RenditionLayout;
 import nl.siegmann.epublib.util.StringUtil;
 
 import org.slf4j.Logger;
@@ -52,6 +53,7 @@ class PackageDocumentMetadataReader extends PackageDocumentBase {
 		result.setDates(readDates(metadataElement));
         result.setOtherProperties(readOtherProperties(metadataElement));
         result.setMetaAttributes(readMetaProperties(metadataElement));
+        result.setRenditionLayout(readLayoutProperties(metadataElement));
         Element languageTag = DOMUtil.getFirstElementByTagNameNS(metadataElement, NAMESPACE_DUBLIN_CORE, DCTags.language);
         if (languageTag != null) {
             result.setLanguage(DOMUtil.getTextChildrenContent(languageTag));
@@ -104,7 +106,40 @@ class PackageDocumentMetadataReader extends PackageDocumentBase {
 		return result;
 	}
 
-	private static String getBookIdId(Document document) {
+    private static RenditionLayout readLayoutProperties(Element metadataElement) {
+        RenditionLayout renditionLayout = new RenditionLayout();
+        NodeList metaTags = metadataElement.getElementsByTagNameNS("http://www.idpf.org/2007/opf", "meta");
+
+        for(int i = 0; i < metaTags.getLength(); ++i) {
+            Node metaNode = metaTags.item(i);
+            Node property = metaNode.getAttributes().getNamedItem("property");
+            if (property != null) {
+                String name = property.getNodeValue();
+                String value = metaNode.getTextContent();
+                if ("rendition:layout".equals(name)) {
+                    renditionLayout.setLayout(value);
+                } else if ("rendition:flow-auto".equals(name)) {
+                    renditionLayout.setFlow("auto");
+                } else if ("rendition:flow-paginated".equals(name)) {
+                    renditionLayout.setFlow("paginated");
+                } else if ("rendition:flow-scrolled-continuous".equals(name)) {
+                    renditionLayout.setFlow("scrolled-continuous");
+                } else if ("rendition:flow-scrolled-doc".equals(name)) {
+                    renditionLayout.setFlow("scrolled-doc");
+                } else if ("rendition:flow".equals(name)) {
+                    renditionLayout.setFlow(value);
+                } else if ("rendition:orientation".equals(name)) {
+                    renditionLayout.setOrientation(value);
+                } else if ("rendition:spread".equals(name)) {
+                    renditionLayout.setSpread(value);
+                }
+            }
+        }
+
+        return renditionLayout;
+    }
+
+    private static String getBookIdId(Document document) {
 		Element packageElement = DOMUtil.getFirstElementByTagNameNS(document.getDocumentElement(), NAMESPACE_OPF, OPFTags.packageTag);
 		if(packageElement == null) {
 			return null;
